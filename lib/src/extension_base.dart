@@ -24,6 +24,8 @@ const int DOKAN_START_ERROR           = -4;
 const int DOKAN_MOUNT_ERROR           = -5;
 const int DOKAN_MOUNT_POINT_ERROR     = -6;
 
+String RootDirectory = "C:";
+
 class DokanOptions {
   int version;
   int threadCount;
@@ -46,4 +48,4 @@ void DbgPrint(String message) {
   stderr.write(message);
 }
 
-int DokanStart(DokanOptions dokan_options, DokanOperations dokan_operations) native "DokanStart";
+int DokanMain(DokanOptions dokan_options, DokanOperations dokan_operations) native "DokanMain";

@@ -10,7 +10,7 @@ import 'package:extension/extension.dart';
 class Hello extends DokanOperations {
 
   int createFile(String filename, int accessMode, int sharedMode, int creationDisposition, int flagsAndAttributes) {
-    return 1;
+    return 0;
   }
 }
 
@@ -18,16 +18,15 @@ void main() {
   DokanOptions dokan_options = new DokanOptions();
   dokan_options.version = DOKAN_VERSION;
   dokan_options.threadCount = 1;
-  dokan_options.mountPoint = "f";
+  dokan_options.mountPoint = "m";
 
   dokan_options.options = 0;
   dokan_options.options |= DOKAN_OPTION_DEBUG;
-  dokan_options.options |= DOKAN_OPTION_STDERR;
   dokan_options.options |= DOKAN_OPTION_KEEP_ALIVE;
 
   DokanOperations hello = new Hello();
 
-  int status = DokanStart(dokan_options, hello);
+  int status = DokanMain(dokan_options, hello);
 
   switch (status) {
     case DOKAN_SUCCESS:
@@ -46,7 +45,7 @@ void main() {
       stderr.write("Driver something wrong\n");
       break;
     case DOKAN_MOUNT_ERROR:
-      stderr.write("Can't assign a drive letter\n");
+      stderr.write("Can't assign drive letter\n");
       break;
     case DOKAN_MOUNT_POINT_ERROR:
       stderr.write("Mount point error\n");
@@ -55,5 +54,4 @@ void main() {
       stderr.write("Unknown error: $status\n");
       break;
   }
-
 }
