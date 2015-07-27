@@ -41,7 +41,7 @@ class DokanOptions {
 }
 
 abstract class DokanOperations {
-  int createFile(String filename, int accessMode, int sharedMode, int creationDisposition, int flagsAndAttributes);
+  int createFile(String filename);
 }
 
 void DbgPrint(String message) {
