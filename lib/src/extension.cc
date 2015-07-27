@@ -74,7 +74,19 @@ LPCWCHAR transformCharStarToLPCWCHAR(const char* str) {
 	return new_str;
 }
 
+char* transformLPCWCHARToCharStar(LPCWCHAR str) {
+	size_t len = wcslen(str);
+	char* new_str = (char*)malloc(sizeof(char) * (len + 1));
+	int i = 0;
+	for (i = 0; i < len; i++) {
+		new_str[i] = (char)str[i];
+	}
+	new_str[i] = '\0';
+	return new_str;
+}
+
 Dart_Handle dart_operations;
+Dart_Isolate current_isolate;
 
 static int DOKAN_CALLBACK
 ExtCreateFile(
@@ -85,6 +97,21 @@ ExtCreateFile(
 	DWORD					FlagsAndAttributes,
 	PDOKAN_FILE_INFO		DokanFileInfo) {
 	printf("Ext Create File\n");
+
+	Dart_EnterIsolate(current_isolate);
+	Dart_EnterScope();
+	Dart_IsolateBlocked();
+
+	Dart_Handle function_name = HandleError(Dart_NewStringFromCString("createFile"));
+	Dart_Handle* args_list = (Dart_Handle*)malloc(sizeof(Dart_Handle) * 6);
+	
+	args_list[0] = HandleError(Dart_NewStringFromCString(transformLPCWCHARToCharStar(FileName)));;
+
+	Dart_Handle result = HandleError(Dart_Invoke(dart_operations, function_name, 1, args_list));
+
+	Dart_IsolateUnblocked();
+	Dart_ExitScope();
+	Dart_ExitIsolate();
 	return 0;
 }
 
@@ -303,6 +330,7 @@ void DartDokanMain(Dart_NativeArguments arguments) {
 
 	Dart_Handle dokan_options = HandleError(Dart_GetNativeArgument(arguments, 0));
 	dart_operations = HandleError(Dart_GetNativeArgument(arguments, 1));
+	current_isolate = Dart_CurrentIsolate();
 
 	PDOKAN_OPERATIONS dokanOperations =
 		(PDOKAN_OPERATIONS)malloc(sizeof(DOKAN_OPERATIONS));
@@ -332,6 +360,7 @@ void DartDokanMain(Dart_NativeArguments arguments) {
 	dokanOptions->MountPoint = transformCharStarToLPCWCHAR(MountPoint);
 
 	ZeroMemory(dokanOperations, sizeof(DOKAN_OPERATIONS));
+
 	dokanOperations->CreateFile = ExtCreateFile;
 	dokanOperations->OpenDirectory = ExtOpenDirectory;
 	dokanOperations->CreateDirectory = ExtCreateDirectory;
